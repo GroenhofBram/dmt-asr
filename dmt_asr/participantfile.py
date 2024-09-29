@@ -5,7 +5,7 @@ from glob import glob
 @dataclass
 class ParticipantFile:
     full_file_path: str
-    session_name: str
+    word_list: str
     participant_id: str
     file_name: str
 

@@ -7,6 +7,13 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
+torch = "^2.4.1"
+transformers = "^4.45.1"
+faster-whisper = "^1.0.3"
+
+
+[tool.poetry.scripts]
+main = 'dmt_asr.dmt-asr:main'
 
 
 [build-system]

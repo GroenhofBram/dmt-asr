@@ -1,21 +1,22 @@
 from os.path import dirname, join
 from glob import glob
 import re
-from glob_properties import create_participant_file
+from dmt_asr.glob_properties import create_participant_file
 
-from participantfile import ParticipantFile
-from participant_session import ParticipantSession
+from dmt_asr.participantfile import ParticipantFile
+from dmt_asr.participant_session import ParticipantSession
 
 
 def get_textgrid_files_matching_wav(wav_participant_file: ParticipantFile, participant_audio_id: str):
     dir_name = dirname(wav_participant_file.full_file_path)
-    glob_path = join(dir_name, f"{participant_audio_id}_f01.TextGrid")
+    glob_path = join(dir_name, f"{participant_audio_id}_checked.TextGrid")
     globs = glob(glob_path)
-    filtered_globs = filter(
-        lambda pth: re.match(pattern=r".*\dLG.*", string=pth, flags=re.IGNORECASE) != None, 
-        globs
-    )
-    return list(filtered_globs)
+    # filtered_globs = filter(
+    #     lambda pth: re.match(pattern=r"*_checked.TextGrid", string=pth, flags=re.IGNORECASE) != None, 
+    #     globs
+    # )
+    print(globs)
+    return list(globs)
 
 def get_participant_sessions_with_textgrids(
     wav_files: list[ParticipantFile],

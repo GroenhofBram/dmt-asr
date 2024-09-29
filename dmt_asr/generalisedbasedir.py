@@ -1,8 +1,8 @@
-from islinux import is_linux
-from pathing import get_abs_folder_path
+from dmt_asr.islinux import is_linux
+from dmt_asr.pathing import get_abs_folder_path
 
 LINUX_BASE_DIR = "/vol/bigdata/corpora/CHOREC-1.0/data"
-WINDOWS_BASE_DIR = get_abs_folder_path("Files\\Data")
+WINDOWS_BASE_DIR = get_abs_folder_path("files\\Data")
 
 def get_base_dir_for_generalised_path():
     if is_linux():

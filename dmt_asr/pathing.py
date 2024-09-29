@@ -1,7 +1,5 @@
 from os.path import abspath, dirname, join
 
-from constants import WAV2VEC2_MODEL_NAME_FLDR
-
 def get_abs_path(base_path: str, file_name: str):
     current_file_path = dirname(__file__)
     joined_paths = join(current_file_path, "..", base_path, file_name)

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from participantfile import ParticipantFile
+from dmt_asr.participantfile import ParticipantFile
 
 @dataclass
 class ParticipantSession:

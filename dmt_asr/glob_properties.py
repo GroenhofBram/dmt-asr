@@ -1,17 +1,16 @@
 from pathlib import Path
 
-from participantfile import ParticipantFile
+from dmt_asr.participantfile import ParticipantFile
 
 def create_participant_file(full_file_path: str, input: str):
     file_path_from_base = full_file_path.replace(input, "")
     pts = Path(file_path_from_base).parts
-    session_name = pts[-3]
-    participant_id = pts[-2]
-    file_name = pts[-1]
+    file_name = str(pts[1])
+    arr = file_name.replace(".wav", "").split("_")
     return ParticipantFile(
         full_file_path=full_file_path,
-        session_name=session_name,
-        participant_id=participant_id,
+        word_list=arr[1],
+        participant_id=arr[0],
         file_name=file_name,
     )
 

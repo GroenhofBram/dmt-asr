@@ -1,14 +1,17 @@
 from glob import glob
+from os.path import join
 from os import makedirs
 import os
-from generalisedbasedir import get_base_dir_for_generalised_path
-from participantsession import get_participant_sessions_with_textgrids
-from pathing import get_base_dir_folder_path
-from glob_properties import generate_file_properties
+from dmt_asr.generalisedbasedir import get_base_dir_for_generalised_path
+from dmt_asr.model_load_transcribe import load_model, transcribe_ASR
+from dmt_asr.participantsession import get_participant_sessions_with_textgrids
+from dmt_asr.pathing import get_base_dir_folder_path
+from dmt_asr.glob_properties import generate_file_properties
 
 
 def main():
-    MODEL = "GroNLP/wav2vec2-dutch-large-ft-cgn"
+    # "GroNLP/wav2vec2-dutch-large-ft-cgn"
+    MODEL = "Systran/faster-whisper-large-v2"
     input(f"-----------------------------------------------------------\nProvided model\t: {MODEL}.\nPress any key to continue...\n-----------------------------------------------------------\t")
 
 
@@ -34,6 +37,42 @@ def main():
     print(f"{existing_output_dirs}")
     print(f"\n- - - TOTAL SKIPPED:\t{len(existing_output_dirs)}- - -")
     input("\n\tIF THIS IS CORRECT PRESS ANY KEY TO START ASR-TRANSCRIPTION GENERATION!\n\t")
+
+
+    failed_runs = []
+    MODEL_LOADED = load_model(MODEL)
+
+    for sesh in participant_sessions:
+        if sesh.participant_audio_id in existing_output_dirs:
+            print(f"\nSKIPPING: {sesh.participant_audio_id} BECAUSE IT ALREADY EXISTS\n")
+        else:
+            print("\n\t ====================================================================")
+            print(f"\nCURRENTLY PROCESSING {sesh}")
+            print("\n\t ====================================================================")
+            try:
+                base_session_folder = join(base_output_dir_in_repo, sesh.participant_audio_id)
+                makedirs(base_session_folder, exist_ok=True)
+
+                # hypothesis column 
+                wav2vec2_ran_transforms_asr_transcription = transcribe_ASR(sesh.wav_participant_file, MODEL, MODEL_LOADED)
+
+                print(f"\n ASR TRANSCRIPTION FOR {sesh.participant_audio_id}")
+                print(f"\t{wav2vec2_ran_transforms_asr_transcription}")
+                print("-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+")
+
+
+            except Exception as e:
+                msg = e
+                if hasattr(e, 'message'):
+                    msg = e.message
+                
+                failed_runs.append({
+                    'id': sesh.participant_audio_id,
+                    'ex': msg
+                })
+
+    if len(failed_runs) > 0:  
+        print(failed_runs)
 
 
 
