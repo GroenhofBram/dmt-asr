@@ -1,5 +1,5 @@
 from glob import glob
-from os.path import join
+from os.path import join, exists
 from os import makedirs
 import os
 from dmt_asr.generalisedbasedir import get_base_dir_for_generalised_path
@@ -7,16 +7,17 @@ from dmt_asr.model_load_transcribe import load_model, transcribe_ASR
 from dmt_asr.participantsession import get_participant_sessions_with_textgrids
 from dmt_asr.pathing import get_base_dir_folder_path
 from dmt_asr.glob_properties import generate_file_properties
-
+import pandas as pd
 
 def main():
-    # "GroNLP/wav2vec2-dutch-large-ft-cgn"
+    # MODEL = "GroNLP/wav2vec2-dutch-large-ft-cgn"
     MODEL = "Systran/faster-whisper-large-v2"
+    
     input(f"-----------------------------------------------------------\nProvided model\t: {MODEL}.\nPress any key to continue...\n-----------------------------------------------------------\t")
-
+    VAD_decision = input("\n\n- - - - - Type 'y' for VAD, type anything else for no VAD - - - - - \n\n")
 
     base_dir = get_base_dir_for_generalised_path()
-    base_output_dir_in_repo = get_base_dir_folder_path("output", MODEL)
+    base_output_dir_in_repo = get_base_dir_folder_path("output", MODEL, VAD_decision)
     print(f"\nBase Dir\t:{base_dir}\nBase Output Dir\t:{base_output_dir_in_repo}")
 
     makedirs(base_output_dir_in_repo, exist_ok=True)
@@ -36,36 +37,68 @@ def main():
     print("\n- - - EXISTING DIRECTORIES AT START OF PROCESS, THESE WILL BE SKIPPED - - -")
     print(f"{existing_output_dirs}")
     print(f"\n- - - TOTAL SKIPPED:\t{len(existing_output_dirs)}- - -")
-    input("\n\tIF THIS IS CORRECT PRESS ANY KEY TO START ASR-TRANSCRIPTION GENERATION!\n\t")
+    input("\n\tIf correct, press any key to continue\n\t")
 
 
     failed_runs = []
-    MODEL_LOADED = load_model(MODEL)
+    
+    MODEL_LOADED, model_name = load_model(MODEL, VAD_decision)
 
-    for sesh in participant_sessions:
+    transcriptions_DF = pd.DataFrame(columns=["participant", "word list", model_name])
+
+    existing_dfs = glob(f"{base_output_dir_in_repo}/**/*.csv", recursive=True)
+    print(f"\n\n----- Found {len(existing_dfs)} existing DFs for this model, adding them-----\n\n")
+
+    for df in existing_dfs:
+        curr_df = pd.read_csv(df)  # Read the current CSV file
+        transcriptions_DF = pd.concat([transcriptions_DF, curr_df], ignore_index=True)
+    
+    print(transcriptions_DF)
+    input("- - - - - This is what the DF looks like (empty if new model). press any key to continue and start ASR-transcription generation- - - - - \t")
+
+    total_sessions = len(participant_sessions)
+
+    for i, sesh in enumerate(participant_sessions, start=1):
         if sesh.participant_audio_id in existing_output_dirs:
             print(f"\nSKIPPING: {sesh.participant_audio_id} BECAUSE IT ALREADY EXISTS\n")
         else:
             print("\n\t ====================================================================")
-            print(f"\nCURRENTLY PROCESSING {sesh}")
+            print(f"\nCURRENTLY PROCESSING {sesh} (Session {i} of {total_sessions})")
             print("\n\t ====================================================================")
             try:
                 base_session_folder = join(base_output_dir_in_repo, sesh.participant_audio_id)
                 makedirs(base_session_folder, exist_ok=True)
 
-                # hypothesis column 
-                wav2vec2_ran_transforms_asr_transcription = transcribe_ASR(sesh.wav_participant_file, MODEL, MODEL_LOADED)
+                ASR_transcription = transcribe_ASR(sesh.wav_participant_file, MODEL, MODEL_LOADED, VAD_decision)
 
                 print(f"\n ASR TRANSCRIPTION FOR {sesh.participant_audio_id}")
-                print(f"\t{wav2vec2_ran_transforms_asr_transcription}")
+                print(f"\t{ASR_transcription}")
                 print("-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+")
 
+                new_row = pd.DataFrame([{
+                    "participant": sesh.textgrid_participant_file.participant_id,
+                    "word list": sesh.textgrid_participant_file.word_list,
+                    model_name: ASR_transcription 
+                }])
+                print(f"\nNEW ROW: \t{new_row}\n")
+                transcriptions_DF = pd.concat([transcriptions_DF, new_row], ignore_index=True)
+
+                row_csv_filename = f"{sesh.participant_audio_id}.csv"
+                row_csv_filepath = join(base_session_folder, row_csv_filename)
+
+                # Check if CSV already exists and append if it does
+                if exists(row_csv_filepath):
+                    new_row.to_csv(row_csv_filepath, mode='a', header=False, index=False)
+                    print(f"Appended new row to existing CSV at {row_csv_filepath}")
+                else:
+                    new_row.to_csv(row_csv_filepath, index=False)
+                    print(f"Exported new row to {row_csv_filepath}")
 
             except Exception as e:
                 msg = e
                 if hasattr(e, 'message'):
                     msg = e.message
-                
+
                 failed_runs.append({
                     'id': sesh.participant_audio_id,
                     'ex': msg
@@ -74,5 +107,11 @@ def main():
     if len(failed_runs) > 0:  
         print(failed_runs)
 
+    print(f"Saving Transcription DF..")
+
+
+    filename = model_name + "_transcriptions.csv"
+
+    transcriptions_DF.to_csv(filename, index=False)
 
 

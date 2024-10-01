@@ -8,5 +8,5 @@ def get_base_dir_for_generalised_path():
     if is_linux():
         print("LINUX_BASE_DIR is undefined, change this when location is known in generalisedbasedir.py")
         return LINUX_BASE_DIR
-    print(f"BASE DIRECTORY WINDOWS:\n \t {WINDOWS_BASE_DIR}")
+    # print(f"BASE DIRECTORY WINDOWS:\n \t {WINDOWS_BASE_DIR}")
     return f"{WINDOWS_BASE_DIR}"

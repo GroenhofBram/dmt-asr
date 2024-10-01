@@ -15,7 +15,7 @@ def get_textgrid_files_matching_wav(wav_participant_file: ParticipantFile, parti
     #     lambda pth: re.match(pattern=r"*_checked.TextGrid", string=pth, flags=re.IGNORECASE) != None, 
     #     globs
     # )
-    print(globs)
+    # print(globs)
     return list(globs)
 
 def get_participant_sessions_with_textgrids(
