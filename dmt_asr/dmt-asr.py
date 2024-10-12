@@ -9,9 +9,11 @@ from dmt_asr.pathing import get_base_dir_folder_path
 from dmt_asr.glob_properties import generate_file_properties
 import pandas as pd
 
+from dmt_asr.textgrid import use_text_grids
+
 def main():
-    # MODEL = "GroNLP/wav2vec2-dutch-large-ft-cgn"
-    MODEL = "Systran/faster-whisper-large-v2"
+    MODEL = "GroNLP/wav2vec2-dutch-large-ft-cgn"
+    # MODEL = "Systran/faster-whisper-large-v2"
     
     input(f"-----------------------------------------------------------\nProvided model\t: {MODEL}.\nPress any key to continue...\n-----------------------------------------------------------\t")
     VAD_decision = input("\n\n- - - - - Type 'y' for VAD, type anything else for no VAD - - - - - \n\n")
@@ -68,6 +70,8 @@ def main():
             try:
                 base_session_folder = join(base_output_dir_in_repo, sesh.participant_audio_id)
                 makedirs(base_session_folder, exist_ok=True)
+                
+                tgt_df_repr = use_text_grids(sesh.textgrid_participant_file.full_file_path)
 
                 ASR_transcription = transcribe_ASR(sesh.wav_participant_file, MODEL, MODEL_LOADED, VAD_decision)
 
@@ -107,11 +111,10 @@ def main():
     if len(failed_runs) > 0:  
         print(failed_runs)
 
-    print(f"Saving Transcription DF..")
+    
 
-
-    filename = model_name + "_transcriptions.csv"
-
-    transcriptions_DF.to_csv(filename, index=False)
+    transcript_filepath = os.path.join("output", model_name + "_transcriptions.csv")
+    print(f"Saving Transcription DF to...:\n\t{transcript_filepath}")
+    transcriptions_DF.to_csv(transcript_filepath, index=False)
 
 

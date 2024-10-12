@@ -1271,6 +1271,17 @@ mpmath = ">=1.1.0,<1.4"
 dev = ["hypothesis (>=6.70.0)", "pytest (>=7.1.0)"]
 
 [[package]]
+name = "tgt"
+version = "1.5"
+description = "TextGridTools -- Read, write, and manipulate Praat TextGrid files"
+optional = false
+python-versions = "*"
+files = [
+    {file = "tgt-1.5-py3-none-any.whl", hash = "sha256:df4566f0f9b1765691dcc984a78963496bca961a27ac7f10050be2db277df5e8"},
+    {file = "tgt-1.5.tar.gz", hash = "sha256:9f64b0fda6fec0f99471f2c5a73000792f46791a69f2ffb04b58f4499110e0aa"},
+]
+
+[[package]]
 name = "tokenizers"
 version = "0.20.0"
 description = ""
@@ -1594,4 +1605,4 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "849d3261602cab5af57b0b423c5d5eff36a6c0ea5098ca74c07fba2da98454ff"
+content-hash = "6100405c88c293b3b616def55a7eaf17602b9c81a729e33f63195895954fdc27"
