@@ -46,7 +46,7 @@ def main():
     
     MODEL_LOADED, model_name = load_model(MODEL, VAD_decision)
 
-    transcriptions_DF = pd.DataFrame(columns=["participant", "word list", model_name])
+    transcriptions_DF = pd.DataFrame(columns=["participant", "word_list_id", model_name])
 
     existing_dfs = glob(f"{base_output_dir_in_repo}/**/*.csv", recursive=True)
     print(f"\n\n----- Found {len(existing_dfs)} existing DFs for this model, adding them-----\n\n")
@@ -70,8 +70,14 @@ def main():
             try:
                 base_session_folder = join(base_output_dir_in_repo, sesh.participant_audio_id)
                 makedirs(base_session_folder, exist_ok=True)
-                
-                tgt_df_repr = use_text_grids(sesh.textgrid_participant_file.full_file_path)
+
+                tgt_df_repr = use_text_grids(
+                    sesh.textgrid_participant_file.full_file_path,
+                    sesh.textgrid_participant_file.participant_id,
+                    sesh.textgrid_participant_file.word_list
+                )
+                print(tgt_df_repr)
+                print(f"^^^ALIGNED ORTHOGRAPHIC TRANSCRIPTION FOR\t {sesh.participant_audio_id}^^^")
 
                 ASR_transcription = transcribe_ASR(sesh.wav_participant_file, MODEL, MODEL_LOADED, VAD_decision)
 
@@ -81,7 +87,7 @@ def main():
 
                 new_row = pd.DataFrame([{
                     "participant": sesh.textgrid_participant_file.participant_id,
-                    "word list": sesh.textgrid_participant_file.word_list,
+                    "word_list_id": sesh.textgrid_participant_file.word_list,
                     model_name: ASR_transcription 
                 }])
                 print(f"\nNEW ROW: \t{new_row}\n")
