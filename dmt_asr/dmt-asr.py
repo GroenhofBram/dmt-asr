@@ -9,6 +9,7 @@ from dmt_asr.pathing import get_base_dir_folder_path
 from dmt_asr.glob_properties import generate_file_properties
 import pandas as pd
 
+from dmt_asr.process_confmatrix import process_conf_matrix
 from dmt_asr.textgrid import use_text_grids
 
 def main():
@@ -60,6 +61,7 @@ def main():
 
     total_sessions = len(participant_sessions)
 
+# TODO: Regenerate evrything 
     for i, sesh in enumerate(participant_sessions, start=1):
         if sesh.participant_audio_id in existing_output_dirs:
             print(f"\nSKIPPING: {sesh.participant_audio_id} BECAUSE IT ALREADY EXISTS\n")
@@ -77,13 +79,20 @@ def main():
                     sesh.textgrid_participant_file.word_list
                 )
                 print(tgt_df_repr)
-                print(f"^^^ALIGNED ORTHOGRAPHIC TRANSCRIPTION FOR\t {sesh.participant_audio_id}^^^")
-
+                print(f"^^^ALIGNED ORTHOGRAPHIC TRANSCRIPTION FOR\t {sesh.participant_audio_id}^^^") # Store in similar way as transcriptins
+                
                 ASR_transcription = transcribe_ASR(sesh.wav_participant_file, MODEL, MODEL_LOADED, VAD_decision)
 
                 print(f"\n ASR TRANSCRIPTION FOR {sesh.participant_audio_id}")
                 print(f"\t{ASR_transcription}")
                 print("-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+")
+
+                process_conf_matrix(
+                    asr_transcriptions=ASR_transcription, 
+                    participant_audio_id=sesh.participant_audio_id, 
+                    base_session_folder=base_session_folder,
+                    ortho_df=tgt_df_repr,
+                )                
 
                 new_row = pd.DataFrame([{
                     "participant": sesh.textgrid_participant_file.participant_id,
