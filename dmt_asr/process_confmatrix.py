@@ -23,7 +23,7 @@ def process_conf_matrix(asr_transcriptions: str, participant_audio_id: str, base
         base_data_dir = join(base_session_folder, "all_data")
         makedirs(base_data_dir, exist_ok=True)
 
-        print("HERE (LINE 25 of process_confmatrix.py)")
+        #print("HERE (LINE 25 of process_confmatrix.py)")
 
 
         csv_filename = f"{participant_audio_id}.csv"
@@ -108,6 +108,12 @@ def process_df(participant_audio_id: str, asr_transcriptions: str, ortho_df: Dat
     except Exception as e:
         print(f"Error during dataframe processing: {e}")
         return DataFrame()
+
+def fill_assessor_judgements(combined_judgements_df):
+    print(combined_judgements_df)
+
+
+    return something
 
 # def process_df(participant_audio_id: str, asr_transcriptions: str, ortho_df: DataFrame):
 #     try:

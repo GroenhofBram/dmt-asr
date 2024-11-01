@@ -28,9 +28,9 @@ def main():
          is_csv=False
     )
 
-    ref_list_binary, hyp_list_binary = get_binary_lists(base_df_binaries)
-    conf_matrix = create_confusion_matrix(ref_list_binary, hyp_list_binary)
-    export_conf_matrix(base_file_path, conf_matrix)
+    # ref_list_binary, hyp_list_binary = get_binary_lists(base_df_binaries)
+    # conf_matrix = create_confusion_matrix(ref_list_binary, hyp_list_binary)
+    # export_conf_matrix(base_file_path, conf_matrix)
 
 
 def read_aligned_file_as_df(file_name):
@@ -101,7 +101,7 @@ def create_confusion_matrix(ref_list_binary, hyp_list_binary):
     return conf_matrix
 
 def export_conf_matrix(base_dir, conf_matrix):
-    file_name = 'Conf_matrix.csv'
+    file_name = ''
     file_path = os.path.join(base_dir, file_name)
     
     # # Are these useful?

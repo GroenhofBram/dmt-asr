@@ -2,6 +2,7 @@ from glob import glob
 from os.path import join, exists
 from os import makedirs
 import os
+from dmt_asr.combine_judgement_files import combine_judgement_files, export_combined_judgement_df
 from dmt_asr.generalisedbasedir import get_base_dir_for_generalised_path
 from dmt_asr.model_load_transcribe import load_model, transcribe_ASR
 from dmt_asr.participantsession import get_participant_sessions_with_textgrids
@@ -9,12 +10,12 @@ from dmt_asr.pathing import get_base_dir_folder_path
 from dmt_asr.glob_properties import generate_file_properties
 import pandas as pd
 
-from dmt_asr.process_confmatrix import process_conf_matrix
+from dmt_asr.process_confmatrix import fill_assessor_judgements, process_conf_matrix
 from dmt_asr.textgrid import use_text_grids
 
 def main():
     MODEL = "GroNLP/wav2vec2-dutch-large-ft-cgn"
-    # MODEL = "Systran/faster-whisper-large-v2"
+    #MODEL = "Systran/faster-whisper-large-v2"
     
     input(f"-----------------------------------------------------------\nProvided model\t: {MODEL}.\nPress any key to continue...\n-----------------------------------------------------------\t")
     VAD_decision = input("\n\n- - - - - Type 'y' for VAD, type anything else for no VAD - - - - - \n\n")
@@ -49,7 +50,7 @@ def main():
 
     transcriptions_DF = pd.DataFrame(columns=["participant", "word_list_id", model_name])
 
-    existing_dfs = glob(f"{base_output_dir_in_repo}/**/*.csv", recursive=True)
+    existing_dfs = glob(f"{base_output_dir_in_repo}/*/*.csv", recursive=True)
     print(f"\n\n----- Found {len(existing_dfs)} existing DFs for this model, adding them-----\n\n")
 
     for df in existing_dfs:
@@ -78,8 +79,8 @@ def main():
                     sesh.textgrid_participant_file.participant_id,
                     sesh.textgrid_participant_file.word_list
                 )
-                print(tgt_df_repr)
-                print(f"^^^ALIGNED ORTHOGRAPHIC TRANSCRIPTION FOR\t {sesh.participant_audio_id}^^^") # Store in similar way as transcriptins
+                #print(tgt_df_repr)
+                #print(f"^^^ALIGNED ORTHOGRAPHIC TRANSCRIPTION FOR\t {sesh.participant_audio_id}^^^") # Store in similar way as transcriptins
                 
                 ASR_transcription = transcribe_ASR(sesh.wav_participant_file, MODEL, MODEL_LOADED, VAD_decision)
 
@@ -87,6 +88,10 @@ def main():
                 print(f"\t{ASR_transcription}")
                 print("-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+")
 
+                # print(f"\n\n\n~~~~~~~~~~~~~~~~~~~~~~~~ ASR_transcription\t:{ASR_transcription}\npart_audio_id\t:{sesh.participant_audio_id}\nbase_folde:\t{base_session_folder}\ntgt_df_repr\t:{tgt_df_repr} ~~~~~~~~~~~~~~~~~~~~~~~~\n\n\n")
+
+
+                print(f"+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-\nProcessing ConfMat for\t:{sesh.participant_audio_id}+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-\n")
                 process_conf_matrix(
                     asr_transcriptions=ASR_transcription, 
                     participant_audio_id=sesh.participant_audio_id, 
@@ -125,11 +130,23 @@ def main():
 
     if len(failed_runs) > 0:  
         print(failed_runs)
-
+    
     
 
     transcript_filepath = os.path.join("output", model_name + "_transcriptions.csv")
     print(f"Saving Transcription DF to...:\n\t{transcript_filepath}")
     transcriptions_DF.to_csv(transcript_filepath, index=False)
 
+
+    existing_judgement_filepaths = glob(f"{base_output_dir_in_repo}/**/all_data/*.csv", recursive=True)
+    combined_judgements_df = combine_judgement_files(existing_judgement_filepaths)
+    combined_judgements_output_filepath = os.path.join("output", model_name + "_judgements.csv")
+    print(f"Saving Judgements DF to...:\n\t{combined_judgements_output_filepath}")   
+    export_combined_judgement_df(combined_judgements_df, combined_judgements_output_filepath)
+    
+
+
+    # Use all data to generate confusion matrices
+    combined_judgements_df_filled = fill_assessor_judgements(combined_judgements_df)
+    
 
