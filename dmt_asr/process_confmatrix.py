@@ -2,9 +2,13 @@ from os import makedirs
 import sys
 from pandas import DataFrame, Series, concat, merge
 from os.path import join
+
+import pytest
 from dmt_asr.adagt.run_init import two_way_alignment
 from dmt_asr.confusion_matrix import add_binaries, create_confusion_matrix, export_conf_matrix, export_df_data, get_binary_lists, read_prompt_file
 import re
+
+from dmt_asr.judgement_assessor.assessor import calculate_assessor_judgement
 
 def process_conf_matrix(asr_transcriptions: str, participant_audio_id: str, base_session_folder: str, ortho_df: DataFrame):
     try:
@@ -112,8 +116,12 @@ def process_df(participant_audio_id: str, asr_transcriptions: str, ortho_df: Dat
 def fill_assessor_judgements(combined_judgements_df):
     print(combined_judgements_df)
 
+    for row in combined_judgements_df.iterrows():
+        prompt_val = row['prompt']
+        assessor_val = row['reference']
+        calculate_assessor_judgement(prompt_val, assessor_val)
 
-    return something
+    return 0
 
 # def process_df(participant_audio_id: str, asr_transcriptions: str, ortho_df: DataFrame):
 #     try:
