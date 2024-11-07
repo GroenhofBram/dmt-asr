@@ -1,20 +1,28 @@
 import pytest
+from itertools import product
 
 @pytest.mark.unit
 def calculate_assessor_judgement(prompt: str, assessor: str) -> int:
-    assessor = assessor.replace("-","")
+    if prompt == assessor:
+        return 0
+    
+    assessor_no_spaces = assessor.replace(" ", "")
+    if prompt == assessor_no_spaces:
+        return 0
+        
+    assessor_no_hyphens = assessor.replace("-", "")
+    if prompt == assessor_no_hyphens:
+        return 0
 
-    print(f"Matching {prompt} , {assessor}")
-    # Prompt == Assessor cases
-    if prompt == assessor or prompt in assessor:
+    # Check if prompt is found in assessor surrounded by hyphens
+    if f"-{prompt}-" in assessor or assessor.startswith(f"{prompt}-") or assessor.endswith(f"-{prompt}") or assessor == prompt or f" {prompt} " in assessor or assessor.startswith(f"{prompt} ") or assessor.endswith(f" {prompt}"):
         return 0
     
-    #Voicedness
-    
-    print("Voicedness")
     prompt_variations = generate_prompt_variations_voice(prompt)
-    if assessor in prompt_variations:
+    if assessor_no_hyphens in prompt_variations:
         return 0
+    
+
 
     # n-insertions 
     
@@ -22,31 +30,37 @@ def calculate_assessor_judgement(prompt: str, assessor: str) -> int:
     else:
         return 1
     
-
 def generate_prompt_variations_voice(voicedness_prompt):
-    # Voicedness
-    voicedness_pairs = set()
-    voicedness_pairs.add(("p","b"))
-    voicedness_pairs.add(("t","d"))
-    voicedness_pairs.add(("f","v"))
-    voicedness_pairs.add(("g","k"))
-    voicedness_pairs.add(("z","s"))
-    
-    voicedness_pairs.add(("b","p"))
-    voicedness_pairs.add(("d","t"))
-    voicedness_pairs.add(("v","f"))
-    voicedness_pairs.add(("k","g"))
-    voicedness_pairs.add(("s","z"))
+    voicedness_pairs = {
+        "p": "b",
+        "b": "p",
+        "t": "d",
+        "d": "t",
+        "f": "v",
+        "v": "f",
+        "g": "k",
+        "k": "g",
+        "z": "s",
+        "s": "z"
+    }
 
-    prompt_var_options = set()
-    prompt_var_options.add(voicedness_prompt)
+    # Set for variations
+    prompt_var_options = set([voicedness_prompt])
 
-    # prompt == pink
-    # pink -> bink -> 
+    # For each character in the prompt, if it's in the voicedness pairs, generate alternatives
+    alternatives = []
+    for char in voicedness_prompt:
+        if char in voicedness_pairs:
+            # Create list of original char and pair
+            alternatives.append([char, voicedness_pairs[char]])
+        else:
+            # If there's no pair, just keep the character as is
+            alternatives.append([char])
 
-    for voice_pairs in voicedness_pairs:
-        letter = voice_pairs[0]
-        replacement = voice_pairs[1]
+    # Generate all combinations
+    for variation in product(*alternatives):
+        prompt_var_options.add("".join(variation))
 
-    print(prompt_var_options)
     return prompt_var_options
+
+

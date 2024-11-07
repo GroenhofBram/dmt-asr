@@ -140,13 +140,14 @@ def main():
 
     existing_judgement_filepaths = glob(f"{base_output_dir_in_repo}/**/all_data/*.csv", recursive=True)
     combined_judgements_df = combine_judgement_files(existing_judgement_filepaths)
-    combined_judgements_output_filepath = os.path.join("output", model_name + "_judgements.csv")
-    print(f"Saving Judgements DF to...:\n\t{combined_judgements_output_filepath}")   
-    export_combined_judgement_df(combined_judgements_df, combined_judgements_output_filepath)
+
     
 
 
     # Use all data to generate confusion matrices
     combined_judgements_df_filled = fill_assessor_judgements(combined_judgements_df)
-    
+    combined_judgements_output_filepath = os.path.join("output", model_name + "_judgements.csv")
+    print(combined_judgements_df_filled[27:50])
+    print(f"Saving Judgements DF to...:\n\t{combined_judgements_output_filepath}")   
+    export_combined_judgement_df(combined_judgements_df_filled, combined_judgements_output_filepath)
 

@@ -114,14 +114,37 @@ def process_df(participant_audio_id: str, asr_transcriptions: str, ortho_df: Dat
         return DataFrame()
 
 def fill_assessor_judgements(combined_judgements_df):
-    print(combined_judgements_df)
-
-    for row in combined_judgements_df.iterrows():
+    filled_df = DataFrame(columns=['prompt','hypothesis','prompt_aligned','prompt_aligned_rev',
+                                   'hypothesis_rev','reference','prompts_plus_orth', 'prompts_plus_hypo',
+                                   'id'])
+    row_number_in_file = 0
+    for index, row in combined_judgements_df.iterrows():
+        row_number_in_file = row_number_in_file +1
         prompt_val = row['prompt']
+        hypothesis_val = row["hypothesis"]
+        prompt_aligned_val = row["prompt_aligned"]
+        prompt_aligned_rev_val = row["prompt_aligned_rev"]
+        hypothesis_rev_val = row["hypothesis_rev"] 
         assessor_val = row['reference']
-        calculate_assessor_judgement(prompt_val, assessor_val)
+        prompts_plus_hypo_val = row["prompts_plus_hypo"]
+        id_val = row["id"]
+        prompts_plus_orth_val = calculate_assessor_judgement(prompt_val, assessor_val)
+        row_arr = [prompt_val, hypothesis_val, prompt_aligned_val, prompt_aligned_rev_val, hypothesis_rev_val, assessor_val,
+                   prompts_plus_orth_val, prompts_plus_hypo_val, id_val]
 
-    return 0
+        #combined_judgements_df.at[index, "prompts_plus_orth"] = judgement_val
+        
+
+        filled_df.loc[row_number_in_file] = row_arr
+
+
+
+        print(f"\nIndex: {index} ------\nrow: {row}\nPrompt: {prompt_val} ----- assessor: {assessor_val} ----- judgement: {prompts_plus_orth_val}")
+    
+    #print(f"\n\n\n\n\n\n\n OoOoOoOoOoOoOoOoOoOoOoOoOoOoOoOoOoOoOoOoOoOoOoOoOo\n\tDF AFTER ASSESSOR JUDGEMENTS\nOoOoOoOoOoOoOoOoOoOoOoOoOoOoOoOoOoOoOoOoOoOoOoOoOo \n\n\n\n\n\n\n{combined_judgements_df}")
+
+    print(f"LEN ORIGINAL DF: {len(combined_judgements_df)} ----- LEN NEW DF: {len(filled_df)}")
+    return filled_df
 
 # def process_df(participant_audio_id: str, asr_transcriptions: str, ortho_df: DataFrame):
 #     try:
