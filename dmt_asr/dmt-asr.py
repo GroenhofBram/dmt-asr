@@ -10,7 +10,7 @@ from dmt_asr.pathing import get_base_dir_folder_path
 from dmt_asr.glob_properties import generate_file_properties
 import pandas as pd
 
-from dmt_asr.process_confmatrix import fill_assessor_judgements, process_conf_matrix
+from dmt_asr.process_confmatrix import fill_agreement_metrics, fill_asr_baseline_judgements, fill_assessor_judgements, process_conf_matrix
 from dmt_asr.textgrid import use_text_grids
 
 def main():
@@ -140,14 +140,15 @@ def main():
 
     existing_judgement_filepaths = glob(f"{base_output_dir_in_repo}/**/all_data/*.csv", recursive=True)
     combined_judgements_df = combine_judgement_files(existing_judgement_filepaths)
+    print(f"\n\n{combined_judgements_df}")
+    #breakpoint()
 
-    
 
-
-    # Use all data to generate confusion matrices
+    # Use all data to generate baseline judgements
     combined_judgements_df_filled = fill_assessor_judgements(combined_judgements_df)
+    combined_judgements_df_filled = fill_asr_baseline_judgements(combined_judgements_df_filled)
+    combined_judgements_df_filled = fill_agreement_metrics(combined_judgements_df_filled)
     combined_judgements_output_filepath = os.path.join("output", model_name + "_judgements.csv")
-    print(combined_judgements_df_filled[27:50])
     print(f"Saving Judgements DF to...:\n\t{combined_judgements_output_filepath}")   
     export_combined_judgement_df(combined_judgements_df_filled, combined_judgements_output_filepath)
 

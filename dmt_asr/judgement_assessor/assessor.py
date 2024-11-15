@@ -3,7 +3,14 @@ from itertools import product
 
 @pytest.mark.unit
 def calculate_assessor_judgement(prompt: str, assessor: str) -> int:
+    #print(f"\n~~~~PROMPT: {prompt}\tASSESSOR: {assessor}\n TYPES:~~~~{type(assessor)} ~~~~~ {type(prompt)}\n~~~~\t~~~~")
+    prompt = str(prompt)
+    assessor = str(assessor)
+
     if prompt == assessor:
+        return 0
+    
+    if prompt in assessor.split():
         return 0
     
     assessor_no_spaces = assessor.replace(" ", "")
@@ -19,13 +26,10 @@ def calculate_assessor_judgement(prompt: str, assessor: str) -> int:
         return 0
     
     prompt_variations = generate_prompt_variations_voice(prompt)
+    prompt_variations = generate_prompt_variatons_n_insertions(prompt_variations)
     if assessor_no_hyphens in prompt_variations:
         return 0
-    
-
-
-    # n-insertions 
-    
+       
 
     else:
         return 1
@@ -64,3 +68,27 @@ def generate_prompt_variations_voice(voicedness_prompt):
     return prompt_var_options
 
 
+def generate_prompt_variatons_n_insertions(prompt_var_options):
+    vowels = "aeiou"
+    new_variations = set()
+
+    for variation in prompt_var_options:
+        # List to store all positions where "n" can be inserted
+        insertion_points = [(i, i + 1) for i, char in enumerate(variation) if char in vowels]
+        
+        # Generate all combinations of inserting "n" after each vowel
+        for insertion in product(*[[0, 1] for _ in insertion_points]):
+            modified_variation = []
+            last_index = 0
+
+            for (index, insert_pos), insert_flag in zip(insertion_points, insertion):
+                modified_variation.append(variation[last_index:insert_pos])
+                if insert_flag:
+                    modified_variation.append("n")
+                last_index = insert_pos
+
+            modified_variation.append(variation[last_index:])
+            new_variations.add("".join(modified_variation))
+
+    prompt_var_options.update(new_variations)
+    return prompt_var_options
