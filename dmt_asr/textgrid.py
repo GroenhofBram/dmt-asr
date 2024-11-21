@@ -22,10 +22,16 @@ def use_text_grids(tgt_file_name, word_list_id: str, participant_id: str):
     tg_df = pd.DataFrame(formatted_table[1:], columns = formatted_table[0])
 
     tg_df_prompts = tg_df[tg_df['tier_name'] == 'Prompt']
+    if tg_df_prompts.empty:
+        tg_df_prompts = tg_df[tg_df['tier_name'] == 'Prompts']
+
+
+
     tg_df_ort_mau = tg_df[tg_df['tier_name'] == 'ORT-MAU']
     tg_df_prompts['reading_errs'] = None
     tg_df_prompts['word_list_id'] = word_list_id
     tg_df_prompts['participant_id'] = participant_id
+    print(f"------------------------\n\t TG_DF_PROMPTS FOR {participant_id}\n{tg_df_prompts}------------------------")
 
 
     # for index, prompt_row in tg_df_prompts.iterrows():
@@ -54,8 +60,13 @@ def use_text_grids(tgt_file_name, word_list_id: str, participant_id: str):
         tg_df_prompts.at[index, 'reading_errs'] = values_repr
 
     tgt_df_repr = tg_df_prompts.reset_index()
+    print(f"------------------------\n\INITIAL TGT_DF_REPR FOR {participant_id}\n{tgt_df_repr}------------------------")
+
+
     tgt_df_repr = tgt_df_repr.drop(columns=['index', 'tier_type', 'tier_name', 'start_time', 'end_time'])
     tgt_df_repr = tgt_df_repr.rename(columns={"reading_errs": "orthography", "text": "prompt"})
     tgt_df_repr = tgt_df_repr.loc[:,['participant_id','word_list_id','prompt', 'orthography']]
+
+    print(f"------------------------\n\tFINAL TGT_DF_REPR FOR {participant_id}\n{tgt_df_repr}------------------------")
 
     return tgt_df_repr

@@ -14,8 +14,8 @@ from dmt_asr.process_confmatrix import fill_agreement_metrics, fill_asr_baseline
 from dmt_asr.textgrid import use_text_grids
 
 def main():
-    MODEL = "GroNLP/wav2vec2-dutch-large-ft-cgn"
-    #MODEL = "Systran/faster-whisper-large-v2"
+    #MODEL = "GroNLP/wav2vec2-dutch-large-ft-cgn"
+    MODEL = "Systran/faster-whisper-large-v2"
     
     input(f"-----------------------------------------------------------\nProvided model\t: {MODEL}.\nPress any key to continue...\n-----------------------------------------------------------\t")
     VAD_decision = input("\n\n- - - - - Type 'y' for VAD, type anything else for no VAD - - - - - \n\n")
@@ -74,6 +74,8 @@ def main():
                 base_session_folder = join(base_output_dir_in_repo, sesh.participant_audio_id)
                 makedirs(base_session_folder, exist_ok=True)
 
+                print(f"\n\tCREATING TGT_DF_REPR SHOULD NOT BE EMPTY\n\tTGT_FILEPATH:{sesh.textgrid_participant_file.full_file_path}\n\tPARTICIPANT_ID:{sesh.textgrid_participant_file.participant_id}\n\tWORD LIST:{sesh.textgrid_participant_file.word_list}\n-------------------------------------------------------------------------------")
+
                 tgt_df_repr = use_text_grids(
                     sesh.textgrid_participant_file.full_file_path,
                     sesh.textgrid_participant_file.participant_id,
@@ -88,10 +90,8 @@ def main():
                 print(f"\t{ASR_transcription}")
                 print("-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+")
 
-                # print(f"\n\n\n~~~~~~~~~~~~~~~~~~~~~~~~ ASR_transcription\t:{ASR_transcription}\npart_audio_id\t:{sesh.participant_audio_id}\nbase_folde:\t{base_session_folder}\ntgt_df_repr\t:{tgt_df_repr} ~~~~~~~~~~~~~~~~~~~~~~~~\n\n\n")
-
-
                 print(f"+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-\nProcessing ConfMat for\t:{sesh.participant_audio_id}+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-\n")
+                print(f"\n\n\n\n\n !!! ORTHODF/TGT_DF_REPR SHOULD NOT BE EMPTY !!! \n\n\n\n\n{tgt_df_repr}")
                 process_conf_matrix(
                     asr_transcriptions=ASR_transcription, 
                     participant_audio_id=sesh.participant_audio_id, 
@@ -151,4 +151,6 @@ def main():
     combined_judgements_output_filepath = os.path.join("output", model_name + "_judgements.csv")
     print(f"Saving Judgements DF to...:\n\t{combined_judgements_output_filepath}")   
     export_combined_judgement_df(combined_judgements_df_filled, combined_judgements_output_filepath)
+
+    
 
