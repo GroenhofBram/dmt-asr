@@ -27,6 +27,7 @@ markers = [
 
 [tool.poetry.scripts]
 main = 'dmt_asr.dmt-asr:main'
+chorec_reformat = 'dmt_asr.reformat_chorec:main'
 
 [build-system]
 requires = ["poetry-core"]
