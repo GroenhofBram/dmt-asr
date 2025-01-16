@@ -1,0 +1,34 @@
+[tool.poetry]
+name = "dmt-asr"
+version = "0.1.0"
+description = ""
+authors = ["groenhofbram <groenhofbram@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+torch = "^2.4.1"
+transformers = "^4.45.1"
+faster-whisper = "^1.0.3"
+pandas = "^2.2.3"
+tgt = "^1.5"
+jiwer = "^3.0.4"
+evaluate = "^0.4.3"
+ffmpeg = "^1.4"
+ffmpeg-python = "^0.2.0"
+scikit-learn = "^1.5.2"
+unidecode = "^1.3.8"
+pytest = "^8.3.3"
+
+[tool.pytest.ini_options]
+markers = [
+    "unit"
+]
+
+[tool.poetry.scripts]
+main = 'dmt_asr.dmt-asr:main'
+chorec_reformat = 'dmt_asr.reformat_chorec:main'
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
